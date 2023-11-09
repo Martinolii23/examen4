@@ -1,0 +1,84 @@
+
+#include <stdio.h>
+
+void sumarColumnas(FILE *archivoEntrada, FILE *archivoSalida, int lineaInicio, int lineaFin);
+
+int main() {
+    FILE *archivoEntrada = fopen("emails.csv", "r");
+
+    if (archivoEntrada == NULL) {
+        perror("Error al abrir el archivo de entrada");
+        return 1;
+    }
+
+    FILE *archivoSalida = fopen("181904.txt", "w");
+
+    if (archivoSalida == NULL) {
+        perror("Error al crear el archivo de salida");
+        fclose(archivoEntrada);
+        return 1;
+    }
+
+    int lineaInicio = 904;
+    int lineaFin = 954;
+
+   
+    sumarColumnas(archivoEntrada, archivoSalida, lineaInicio, lineaFin);
+
+    fclose(archivoEntrada);
+    fclose(archivoSalida);
+
+    printf("Suma de las columnas de las líneas 904 a 954 \n");
+
+    return 0;
+}
+
+void sumarColumnas(FILE *archivoEntrada, FILE *archivoSalida, int lineaInicio, int lineaFin) {
+    int contadorLineas = 1;
+    char linea[1024];
+
+    while (fgets(linea, sizeof(linea), archivoEntrada) != NULL) {
+        if (contadorLineas >= lineaInicio && contadorLineas <= lineaFin) {
+            int valor = 0; 
+            int indiceColumna = 0;
+            int esNumero = 0; 
+
+            
+            for (int i = 0; linea[i] != '\0'; i++) {
+                if (linea[i] == ',') {
+                   
+                    if (esNumero) {
+                        
+                        fprintf(archivoSalida, "Suma de la Columna %d: %d\n", indiceColumna + 1, valor);
+                        indiceColumna++;
+                        valor = 0; 
+                        esNumero = 0; 
+                    }
+                } else if (linea[i] >= '0' && linea[i] <= '9') {
+                    
+                    valor = valor * 10 + (linea[i] - '0');
+                    esNumero = 1; 
+                } else {
+                    
+                    if (esNumero) {
+                        fprintf(archivoSalida, "Suma de la Columna %d: %d\n", indiceColumna + 1, valor);
+                        indiceColumna++;
+                        valor = 0; 
+                        esNumero = 0; 
+                    }
+                }
+            }
+
+            
+            if (esNumero) {
+                fprintf(archivoSalida, "Suma de la Columna %d: %d\n", indiceColumna + 1, valor);
+            }
+        }
+
+        if (contadorLineas > lineaFin) {
+            break;
+        }
+
+        contadorLineas++;
+    }
+}
